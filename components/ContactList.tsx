@@ -348,9 +348,14 @@ const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact, on
                                         {contact.eventLinks.map(link => {
                                             const eventName = events.find(e => e.id === link.eventId)?.name;
                                             return eventName ? (
-                                            <span key={`${link.eventId}-${link.role}`} className={`px-2 py-1 text-xs font-semibold rounded-full ${roleColors[link.role]}`}>
+                                            <a 
+                                                key={`${link.eventId}-${link.role}`} 
+                                                href={`/events/${link.eventId}`}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className={`px-2 py-1 text-xs font-semibold rounded-full hover:opacity-80 transition-opacity ${roleColors[link.role]}`}
+                                            >
                                                 {eventName}
-                                            </span>
+                                            </a>
                                             ) : null;
                                         })}
                                     </div>

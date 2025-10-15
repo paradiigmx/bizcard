@@ -6,6 +6,11 @@ BizCard+ is an intelligent business card scanner application that uses AI to ext
 
 ## Recent Changes
 
+**October 15, 2025 (Session 6 - Part 3)**
+- Fixed event links on contact cards - now clickable and navigate to event detail pages
+- Event names on contact cards were previously non-clickable spans, now proper links
+- Added stopPropagation to prevent contact card click when clicking event link
+
 **October 15, 2025 (Session 6 - Part 2)**
 - Implemented version-based data migration system to ensure demo data persists
 - Added bc_data_version localStorage key to track and migrate demo data changes
