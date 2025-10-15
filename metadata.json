@@ -1,0 +1,7 @@
+{
+  "name": "BizCard",
+  "description": "An intelligent business card scanner that uses AI to extract, parse, and save contact information. Powered by Paradiigm.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
