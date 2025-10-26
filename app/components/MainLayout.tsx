@@ -33,17 +33,7 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                 {(process.env.NEXT_PUBLIC_API_KEY || isOnboarding) ? children : <ApiKeyWarning />}
                 
                 {!isPublicProfile && !isOnboarding && (
-                    <>
-                        <div className="mt-8 mb-6">
-                            <a href="https://www.paradiigm.net/" target="_blank" rel="noopener noreferrer" className="block">
-                                <img 
-                                    src="/pdiigm-ads.png" 
-                                    alt="Welcome to the Shift - Paradiigm" 
-                                    className="w-full h-auto rounded-lg shadow-lg hover:shadow-xl transition-shadow"
-                                />
-                            </a>
-                        </div>
-                        <div className="mt-8 pt-6 border-t border-[rgb(var(--color-border))] text-center text-xs text-[rgb(var(--color-text-subtle))]">
+                    <div className="mt-8 pt-6 border-t border-[rgb(var(--color-border))] text-center text-xs text-[rgb(var(--color-text-subtle))]">
                         <p className="font-semibold mb-2">Powered by Paradiigm</p>
                         <div className="flex items-center justify-center gap-3 flex-wrap mb-4">
                             <span>info@pdiigm.com</span>
@@ -55,7 +45,6 @@ const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
                             <span>Est 2025</span>
                         </div>
                     </div>
-                    </>
                 )}
             </div>
             {!isPublicProfile && !isOnboarding && <Nav />}

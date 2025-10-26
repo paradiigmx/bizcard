@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { GoogleGenAI, Type } from "@google/genai";
 import { useAppContext } from '../provider';
@@ -23,15 +23,29 @@ export default function OnboardingPage() {
   });
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+
+  useEffect(() => {
+    if (isCameraOpen && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(err => {
+        console.error("Error playing video:", err);
+      });
+    }
+  }, [isCameraOpen]);
 
   const openCamera = async () => {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: "environment",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 }
+          } 
+        });
+        streamRef.current = stream;
         setIsCameraOpen(true);
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
       } catch (err) {
         console.error("Error accessing camera: ", err);
         const error = err as Error;
@@ -47,9 +61,12 @@ export default function OnboardingPage() {
   };
 
   const closeCamera = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
     }
     setIsCameraOpen(false);
   };
@@ -167,7 +184,7 @@ export default function OnboardingPage() {
         <div className="bg-[rgb(var(--color-bg-secondary))] rounded-lg shadow-xl p-8">
           <div className="text-center mb-8">
             <div className="flex items-center justify-center mb-4">
-              <Image src="/bizcard-logo.png" alt="BizCard+" width={48} height={48} />
+              <Image src="/bizcard-icon.png" alt="BizCard+" width={64} height={64} />
               <h1 className="text-3xl font-bold ml-3">Welcome to BizCard+</h1>
             </div>
             <p className="text-[rgb(var(--color-text-secondary))]">
@@ -183,21 +200,30 @@ export default function OnboardingPage() {
                   <XIcon className="h-6 w-6" />
                 </button>
               </div>
-              <div className="flex-1 relative">
+              <div className="flex-1 relative flex items-center justify-center overflow-hidden">
                 <video
                   ref={videoRef}
                   autoPlay
                   playsInline
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
+                {/* Business card aspect ratio guide (7:4 ratio like a real business card) */}
+                <div className="relative z-10 w-[92%] max-w-[850px]" style={{ aspectRatio: '7/4' }}>
+                  <div className="absolute inset-0">
+                    <div className="absolute top-0 left-0 w-16 h-16 border-t-[6px] border-l-[6px] border-[rgb(var(--color-primary))]"></div>
+                    <div className="absolute top-0 right-0 w-16 h-16 border-t-[6px] border-r-[6px] border-[rgb(var(--color-primary))]"></div>
+                    <div className="absolute bottom-0 left-0 w-16 h-16 border-b-[6px] border-l-[6px] border-[rgb(var(--color-primary))]"></div>
+                    <div className="absolute bottom-0 right-0 w-16 h-16 border-b-[6px] border-r-[6px] border-[rgb(var(--color-primary))]"></div>
+                  </div>
+                </div>
                 <canvas ref={canvasRef} style={{ display: 'none' }} />
               </div>
               <div className="p-6 bg-black/80">
                 <button
                   onClick={snapPhoto}
-                  className="w-full py-4 bg-[rgb(var(--color-primary))] text-white rounded-lg font-semibold"
+                  className="w-full py-4 bg-[rgb(var(--color-primary))] text-white rounded-lg font-semibold text-lg hover:bg-opacity-90 transition-opacity"
                 >
-                  Capture Photo
+                  Capture business card
                 </button>
               </div>
             </div>

@@ -129,14 +129,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ profile, onUpdateProfile, allTags
             }
         } catch (err) {
             console.error("Error accessing camera: ", err);
-            const error = err as Error;
-            if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
-                alert('Camera permission denied. Please allow camera access in your browser settings and try again.');
-            } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
-                alert('No camera found on this device. Please use a device with a camera.');
-            } else {
-                alert("Could not access camera. Please ensure permissions are granted.");
-            }
+            alert("Could not access camera. Please ensure permissions are granted.");
         }
     };
 

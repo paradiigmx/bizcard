@@ -117,7 +117,7 @@ ADR;TYPE=WORK:;;${address.street};${address.city};${address.state};${address.pos
             <div className="min-h-screen bg-[rgb(var(--color-bg-primary))] p-4">
                 <div className="max-w-2xl mx-auto pt-16">
                     <div className="text-center mb-8">
-                        <Image src="/bizcard-logo.png" alt="BizCard+" width={64} height={64} className="mx-auto mb-4" />
+                        <Image src="/bizcard-icon.png" alt="BizCard+" width={80} height={80} className="mx-auto mb-4" />
                         <h1 className="text-3xl font-bold mb-2">You've received a BizCard+</h1>
                         <p className="text-[rgb(var(--color-text-secondary))]">
                             {profileToShow.name} wants to connect with you

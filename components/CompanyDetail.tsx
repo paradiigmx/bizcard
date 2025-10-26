@@ -280,7 +280,7 @@ const CompanyDetail: React.FC<CompanyDetailProps> = ({ companyId }) => {
                             <img 
                                 src={company.logo_url} 
                                 alt={`${company.name} logo`}
-                                className="w-24 h-24 rounded-lg object-cover border-2 border-[rgb(var(--color-border))]"
+                                className="w-24 h-24 rounded-lg object-contain border-2 border-[rgb(var(--color-border))] bg-white p-2"
                             />
                         </div>
                     )}

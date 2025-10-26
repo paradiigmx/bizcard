@@ -310,6 +310,7 @@ const AddContact: React.FC<AddContactProps> = ({ onSaveContact, onCancel, allTag
                 setIsCameraOpen(true);
                 if (videoRef.current) {
                     videoRef.current.srcObject = stream;
+                    await videoRef.current.play();
                 }
             } catch (err) {
                 console.error("Error accessing camera: ", err);
@@ -526,17 +527,42 @@ const AddContact: React.FC<AddContactProps> = ({ onSaveContact, onCancel, allTag
     return (
         <>
             {isCameraOpen && (
-                <div className="fixed inset-0 bg-black z-50 flex flex-col items-center justify-center p-4">
-                    <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover"></video>
-                    <canvas ref={canvasRef} className="hidden"></canvas>
-                    <div className="absolute top-4 right-4 flex flex-col gap-3">
-                        <button onClick={handleCancel} className="text-white bg-black bg-opacity-50 rounded-full p-2">
-                            <XIcon className="h-8 w-8" />
+                <div className="fixed inset-0 bg-black z-50 flex flex-col">
+                    <div className="flex justify-between items-center p-4 bg-black/80">
+                        <h3 className="text-white font-semibold">Scan Business Card</h3>
+                        <button onClick={handleCancel} className="text-white">
+                            <XIcon className="h-6 w-6" />
                         </button>
                     </div>
-                    <div className="absolute bottom-6 flex flex-col items-center gap-4 w-full px-4">
-                        <button onClick={snapPhoto} className="border-4 border-white rounded-full w-20 h-20 bg-[rgb(var(--color-primary))] hover:bg-[rgb(var(--color-primary-hover))]"></button>
-                        <button onClick={closeCamera} className="w-full text-center px-4 py-3 font-semibold text-white bg-slate-700 bg-opacity-80 rounded-lg shadow hover:bg-slate-800 transition-colors">
+                    <div className="flex-1 relative flex items-center justify-center overflow-hidden">
+                        <video 
+                            ref={videoRef} 
+                            autoPlay 
+                            playsInline 
+                            className="absolute inset-0 w-full h-full object-cover"
+                        />
+                        {/* Business card aspect ratio guide (7:4 ratio like a real business card) */}
+                        <div className="relative z-10 w-[92%] max-w-[850px]" style={{ aspectRatio: '7/4' }}>
+                            <div className="absolute inset-0">
+                                <div className="absolute top-0 left-0 w-16 h-16 border-t-[6px] border-l-[6px] border-[rgb(var(--color-primary))]"></div>
+                                <div className="absolute top-0 right-0 w-16 h-16 border-t-[6px] border-r-[6px] border-[rgb(var(--color-primary))]"></div>
+                                <div className="absolute bottom-0 left-0 w-16 h-16 border-b-[6px] border-l-[6px] border-[rgb(var(--color-primary))]"></div>
+                                <div className="absolute bottom-0 right-0 w-16 h-16 border-b-[6px] border-r-[6px] border-[rgb(var(--color-primary))]"></div>
+                            </div>
+                        </div>
+                        <canvas ref={canvasRef} style={{ display: 'none' }} />
+                    </div>
+                    <div className="p-6 bg-black/80 flex flex-col gap-3">
+                        <button 
+                            onClick={snapPhoto} 
+                            className="w-full py-4 bg-[rgb(var(--color-primary))] text-white rounded-lg font-semibold text-lg hover:bg-opacity-90 transition-opacity"
+                        >
+                            Capture business card
+                        </button>
+                        <button 
+                            onClick={closeCamera} 
+                            className="w-full py-3 text-white bg-slate-700/80 rounded-lg font-semibold hover:bg-slate-800 transition-colors"
+                        >
                             Add Manually
                         </button>
                     </div>

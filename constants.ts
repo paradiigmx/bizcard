@@ -16,11 +16,11 @@ export const PARADIIGM_CONTACT: Contact = {
   eventLinks: [{ eventId: 'paradiigm_shift_2025', role: 'Speaker' }],
   isFavorite: true,
   contactType: 'Partner',
-  image_url: '/kyle-harris-photo.jpeg',
   featured: true,
   ribbonText: 'App Developer',
   locationState: 'United States - Nevada',
   locationCity: 'Las Vegas',
+  image_url: '/kyle-harris-profile.jpg',
 };
 
 export const INITIAL_MY_PROFILE: Contact = {
@@ -53,10 +53,10 @@ export const INITIAL_EVENTS: Event[] = [
         name: 'Paradiigm Shift 2025',
         date: '2025-12-15',
         location: 'Las Vegas, NV',
-        description: 'Step beyond the ordinary. Experience a transformative convergence where artificial intelligence meets human potential. Join us in redefining what\'s possible—not just in technology, but in how we think, connect, and create the future together.',
+        description: 'Paradiigm is both a mindset and a movement, a gathering of visionaries redefining what\'s possible. It\'s where ideas shift, perspectives evolve, and bold change begins.',
         url: 'https://www.paradiigm.net/',
-        image_url: '/paradiigm-logo.jpg',
-        companyId: 'paradiigm_llc'
+        companyId: 'paradiigm_llc',
+        image_url: '/paradiigm-logo.png'
     },
 ];
 

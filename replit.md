@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 26, 2025**
+- Enhanced camera frame for business card capture: Increased frame size from 700px to 850px max-width for better visibility
+- Updated camera frame styling: Removed white border, kept only blue corner guides (6px thick, 16px size) for cleaner interface
+- Improved camera UX: Removed instructional text overlay, changed button text from "Capture Photo" to "Capture business card"
+- Updated BizCard+ branding: Replaced old logo with new horizontal logo in header (bizcard-logo-new.png)
+- Added BizCard+ icon logo to onboarding page and profile share page (bizcard-icon.png)
+- Implemented white backgrounds (bg-white p-2) with object-contain for all user-uploaded company logos across all pages
+- Fixed company logo display consistency: Company logos now show with white backgrounds in CompanyList, CompanyDetail, and Event detail pages
+- Maintained clean appearance for app logos (BizCard+, Paradiigm) without backgrounds
+
 **October 25, 2025**
 - Added comprehensive contact filter preferences system with support for Lists, Events, Tags, States, Contact Types, Professions, and Event Roles
 - Implemented FilterPreferences interface in AppSettings for default filter settings

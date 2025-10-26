@@ -105,7 +105,7 @@ const AddCompanyModal: React.FC<AddCompanyModalProps> = ({ isOpen, onClose, onCr
                             <img 
                                 src={company.logo_url} 
                                 alt="Logo preview" 
-                                className="w-24 h-24 object-cover rounded-lg border-2 border-[rgb(var(--color-border))]"
+                                className="w-24 h-24 object-contain rounded-lg border-2 border-[rgb(var(--color-border))] bg-white p-2"
                             />
                         </div>
                     )}
@@ -257,7 +257,7 @@ const CompanyList: React.FC = () => {
                                                 <img 
                                                     src={company.logo_url} 
                                                     alt={`${company.name} logo`}
-                                                    className="w-16 h-16 rounded-lg object-cover border border-[rgb(var(--color-border))]"
+                                                    className="w-16 h-16 rounded-lg object-contain border border-[rgb(var(--color-border))] bg-white p-2"
                                                 />
                                             </div>
                                         )}

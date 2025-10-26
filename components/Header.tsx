@@ -14,12 +14,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <div className="flex items-center justify-between px-4 py-3">
                 <div className="flex items-center">
                     <Image 
-                        src="/bizcard-logo.png" 
+                        src="/bizcard-logo-new.png" 
                         alt="BizCard Logo" 
-                        width={120} 
+                        width={160} 
                         height={40} 
                         priority
-                        className="h-10 w-auto"
+                        style={{ height: '40px', width: 'auto' }}
                     />
                 </div>
                 

@@ -86,7 +86,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   useEffect(() => {
     try {
       const dataVersion = localStorage.getItem('bc_data_version');
-      const CURRENT_VERSION = '3';
+      const CURRENT_VERSION = '8';
       
       if (dataVersion !== CURRENT_VERSION) {
         console.log('Migrating to new demo data version', CURRENT_VERSION);
@@ -104,7 +104,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             id: 'paradiigm_llc',
             name: 'Paradiigm LLC',
             featured: true,
-            logo_url: '/paradiigm-logo.jpg',
+            logo_url: '/paradiigm-logo.png',
             email: 'info@pdiigm.com',
             phone: '702-573-4043',
             website: 'paradiigm.net',
@@ -145,7 +145,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             id: 'paradiigm_llc',
             name: 'Paradiigm LLC',
             featured: true,
-            logo_url: '/paradiigm-logo.jpg',
+            logo_url: '/paradiigm-logo.png',
             email: 'info@pdiigm.com',
             phone: '702-573-4043',
             website: 'paradiigm.net',
@@ -162,6 +162,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           });
         }
         
+        // Update Kyle Harris contact with new profile picture
+        loadedContacts = loadedContacts.map(contact => {
+          if (contact.id === 'paradiigm_contact_id' || contact.handle === 'kyle-harris') {
+            return { ...contact, image_url: '/kyle-harris-profile.jpg' };
+          }
+          const cleaned = { ...contact };
+          if (cleaned.image_url && (cleaned.image_url.includes('kyle-harris-photo') || cleaned.image_url.includes('paradiigm-logo') || cleaned.image_url.includes('pdiigm-ads'))) {
+            delete cleaned.image_url;
+          }
+          return cleaned;
+        });
+        
         setContacts(loadedContacts);
         setCompanies(loadedCompanies);
         setEvents(INITIAL_EVENTS);
@@ -175,6 +187,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         
         let loadedCompanies: Company[] = comp ? JSON.parse(comp) : [];
         
+        // Clean up contacts with invalid image references and update Kyle Harris profile
+        let loadedContacts: Contact[] = c ? JSON.parse(c) : INITIAL_CONTACTS;
+        loadedContacts = loadedContacts.map(contact => {
+          if (contact.id === 'paradiigm_contact_id' || contact.handle === 'kyle-harris') {
+            return { ...contact, image_url: '/kyle-harris-profile.jpg' };
+          }
+          const cleaned = { ...contact };
+          if (cleaned.image_url && (cleaned.image_url.includes('kyle-harris-photo') || cleaned.image_url.includes('paradiigm-logo') || cleaned.image_url.includes('pdiigm-ads'))) {
+            delete cleaned.image_url;
+          }
+          return cleaned;
+        });
+        
         if (loadedCompanies.length === 0) {
           const paradiigmCompany: Company = {
             id: 'paradiigm_llc',
@@ -183,14 +208,14 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             phone: '702-573-4043',
             website: 'paradiigm.net',
             featured: true,
-            logo_url: '/paradiigm-logo.jpg',
+            logo_url: '/paradiigm-logo.png',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString()
           };
           loadedCompanies = [paradiigmCompany];
         }
         
-        setContacts(c ? JSON.parse(c) : INITIAL_CONTACTS);
+        setContacts(loadedContacts);
         setEvents(e ? JSON.parse(e) : INITIAL_EVENTS);
         setMyProfile(p ? JSON.parse(p) : INITIAL_MY_PROFILE);
         setCompanies(loadedCompanies);
