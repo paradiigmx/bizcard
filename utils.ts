@@ -76,17 +76,15 @@ export async function compressImage(file: File, maxWidth = 200, maxHeight = 200,
   });
 }
 
-export function getDefaultAvatar(theme: string): string {
-  const themeMap: Record<string, string> = {
-    'slate': '/default-avatars/slate.jpg',
-    'ocean': '/default-avatars/ocean.jpg',
-    'forest': '/default-avatars/forest.jpg',
-    'rose': '/default-avatars/rose.jpg',
-    'sunset': '/default-avatars/sunset.jpg',
-    'system': '/default-avatars/system.jpg',
-  };
-  
-  return themeMap[theme] || themeMap['system'];
+export function getAvatar(contact: Partial<Contact>): string {
+    if (contact.image_url) {
+        return contact.image_url;
+    }
+
+    const SEED = contact.id || contact.name || 'default';
+    const hash = SEED.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const avatarId = (hash % 3) + 1;
+    return `/default-avatars/${avatarId}.svg`;
 }
 
 export function sendEmailToContacts(contacts: Contact[], subject: string = ''): void {
