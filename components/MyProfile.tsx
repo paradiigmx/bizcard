@@ -8,7 +8,7 @@ import TagEditor from './TagEditor';
 import QrCodeModal from './QrCodeModal';
 import BusinessCardCreator from './BusinessCardCreator';
 import { locationData, countries } from '../locationData';
-import { compressImage } from '../utils';
+import { compressImage, getAvatar } from '../utils';
 import { useAppContext } from '../app/provider';
 
 interface MyProfileProps {
@@ -530,7 +530,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ profile, onUpdateProfile, allTags
                             <div className="relative">
                                 {editedProfile.image_url ? (
                                     <div className="relative">
-                                        <img src={editedProfile.image_url} alt="Profile" className="w-32 h-32 rounded-full object-cover object-center border-4 border-[rgb(var(--color-primary))]" />
+                                        <img src={getAvatar(editedProfile)} alt="Profile" className="w-32 h-32 rounded-full object-cover object-center border-4 border-[rgb(var(--color-primary))]" />
                                         <button
                                             onClick={removeProfilePicture}
                                             className="absolute -top-2 -right-2 bg-[rgb(var(--color-danger))] text-white rounded-full p-1.5 hover:opacity-90"
@@ -637,7 +637,7 @@ const MyProfile: React.FC<MyProfileProps> = ({ profile, onUpdateProfile, allTags
                     <div className="space-y-3">
                         {profile.image_url && (
                             <div className="flex justify-center">
-                                <img src={profile.image_url} alt={profile.name} className="w-32 h-32 rounded-full object-cover object-center border-4 border-[rgb(var(--color-primary))]" />
+                                <img src={getAvatar(profile)} alt={profile.name} className="w-32 h-32 rounded-full object-cover object-center border-4 border-[rgb(var(--color-primary))]" />
                             </div>
                         )}
                         <div className={profile.image_url ? 'text-center' : ''}>
