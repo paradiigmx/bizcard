@@ -11,6 +11,10 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 **October 26, 2025**
+- **Mobile Optimization**: Fixed responsive layout for contact list buttons - buttons now hide text labels on mobile and show only icons, preventing overflow
+- **Apple Wallet & Google Wallet Support**: Added ability to save contacts to Apple Wallet and Google Wallet via VCF download buttons on profile pages and public share pages
+- **Camera Scanner**: Fixed business card scanner with Google Gemini API integration, now fully functional
+- **Vercel Deployment Fix**: Removed incorrect rewrite rules from vercel.json that were breaking navigation between pages
 - Enhanced camera frame for business card capture: Increased frame size from 700px to 850px max-width for better visibility
 - Updated camera frame styling: Removed white border, kept only blue corner guides (6px thick, 16px size) for cleaner interface
 - Improved camera UX: Removed instructional text overlay, changed button text from "Capture Photo" to "Capture business card"

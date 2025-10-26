@@ -427,37 +427,37 @@ const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact, on
                 </div>
             )}
 
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                 <h2 className="text-2xl font-bold text-[rgb(var(--color-text-primary))]">{t('contacts.title')} ({filteredContacts.length})</h2>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 w-full sm:w-auto">
                     {!isMultiSelectMode ? (
                         <>
-                            <button onClick={handleShare} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity">
+                            <button onClick={handleShare} className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity" aria-label="Share">
                                 <ShareIcon className="h-5 w-5" />
                             </button>
-                            <button onClick={handleExport} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity">
+                            <button onClick={handleExport} className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity">
                                 <DownloadIcon className="h-5 w-5" />
-                                Export
+                                <span className="hidden sm:inline">Export</span>
                             </button>
-                            <button onClick={() => setIsMultiSelectMode(true)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity">
+                            <button onClick={() => setIsMultiSelectMode(true)} className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity">
                                 <BadgeCheckIcon className="h-5 w-5" />
-                                Select
+                                <span className="hidden sm:inline">Select</span>
                             </button>
-                            <button onClick={() => sendEmailToContacts(filteredContacts)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-[rgb(var(--color-success))] rounded-lg shadow hover:opacity-90 transition-opacity">
+                            <button onClick={() => sendEmailToContacts(filteredContacts)} className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-[rgb(var(--color-success))] rounded-lg shadow hover:opacity-90 transition-opacity">
                                 <MailIcon className="h-5 w-5" />
-                                Send Email
+                                <span className="hidden sm:inline">Send Email</span>
                             </button>
-                            <a href="/contacts/add" className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[rgb(var(--color-primary-text))] bg-[rgb(var(--color-primary))] rounded-lg shadow hover:opacity-90 transition-opacity">
+                            <a href="/contacts/add" className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-[rgb(var(--color-primary-text))] bg-[rgb(var(--color-primary))] rounded-lg shadow hover:opacity-90 transition-opacity">
                                 <PlusIcon className="h-5 w-5" />
-                                Add Contact
+                                <span className="hidden sm:inline">Add Contact</span>
                             </a>
                         </>
                     ) : (
                         <>
-                            <button onClick={handleSelectAll} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity">
+                            <button onClick={handleSelectAll} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-[rgb(var(--color-text-secondary))] bg-[rgb(var(--color-bg-subtle))] rounded-lg shadow hover:opacity-80 transition-opacity">
                                 {selectedContacts.size === filteredContacts.length ? 'Deselect All' : 'Select All'}
                             </button>
-                            <button onClick={handleCancelMultiSelect} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:opacity-80 transition-opacity">
+                            <button onClick={handleCancelMultiSelect} className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg shadow hover:opacity-80 transition-opacity">
                                 Cancel
                             </button>
                         </>

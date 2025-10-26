@@ -56,37 +56,29 @@ export default function PublicProfilePage() {
         }
     }, [handle, contacts, myProfile, router, hasApp, autoAdd, handleSaveContact]);
 
-    const handleDownloadVCF = () => {
+    const handleDownloadVCF = async () => {
         if (!profileToShow) return;
         
-        const { name, role, company, email, phone, address, websites } = profileToShow;
-        const [firstName, ...lastNameParts] = name.split(' ');
-        const lastName = lastNameParts.join(' ');
-        
-        let vcf = `BEGIN:VCARD
-VERSION:3.0
-N:${lastName};${firstName};;;
-FN:${name}
-ORG:${company}
-TITLE:${role}
-TEL;TYPE=WORK,VOICE:${phone}
-EMAIL:${email}
-ADR;TYPE=WORK:;;${address.street};${address.city};${address.state};${address.postal_code};${address.country}
-`;
-        (websites || []).forEach(url => {
-            if(url) vcf += `URL:${url}\n`;
-        });
-        vcf += `END:VCARD`;
-
-        const blob = new Blob([vcf], { type: 'text/vcard;charset=utf-8' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', `${name.replace(/\s/g, '_')}.vcf`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
+        try {
+            const response = await fetch('/api/vcard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(profileToShow),
+            });
+            
+            if (!response.ok) throw new Error('Failed to generate contact card');
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${profileToShow.name.replace(/\s+/g, '_')}.vcf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading contact card:', error);
+            alert('Failed to download contact card. Please try again.');
+        }
     };
 
     const handleDownloadApp = () => {
@@ -167,10 +159,12 @@ ADR;TYPE=WORK:;;${address.street};${address.city};${address.state};${address.pos
                             </button>
                             <button
                                 onClick={handleDownloadVCF}
-                                className="w-full py-4 bg-[rgb(var(--color-bg-tertiary))] rounded-lg font-semibold flex items-center justify-center gap-2"
+                                className="w-full py-4 bg-black text-white rounded-lg font-semibold flex items-center justify-center gap-2"
                             >
-                                <DownloadIcon className="h-5 w-5" />
-                                Download Contact Card
+                                <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2L2 7v10c0 5.5 3.8 10.7 10 12 6.2-1.3 10-6.5 10-12V7l-10-5zm0 2.2l8 4v8.3c0 4.5-3.2 8.8-8 9.8-4.8-1-8-5.3-8-9.8v-8.3l8-4zM10 14l-3-3-1.4 1.4L10 16.8l7.4-7.4L16 8l-6 6z" />
+                                </svg>
+                                Add to Apple Wallet / Google Wallet
                             </button>
                         </div>
 

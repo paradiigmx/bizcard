@@ -409,6 +409,29 @@ const MyProfile: React.FC<MyProfileProps> = ({ profile, onUpdateProfile, allTags
             }
         }
     };
+
+    const downloadToWallet = async () => {
+        try {
+            const response = await fetch('/api/vcard', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(profile),
+            });
+            
+            if (!response.ok) throw new Error('Failed to generate contact card');
+            
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${profile.name.replace(/\s+/g, '_')}.vcf`;
+            link.click();
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Error downloading wallet card:', error);
+            alert('Failed to download contact card. Please try again.');
+        }
+    };
     
     return (
         <>
@@ -692,6 +715,19 @@ const MyProfile: React.FC<MyProfileProps> = ({ profile, onUpdateProfile, allTags
                                     </div>
                                 </div>
                                 <p className="text-xs text-[rgb(var(--color-text-subtle))] mt-3 text-center">Share this code to connect</p>
+                                
+                                <div className="mt-4 pt-4 border-t border-[rgb(var(--color-border))]">
+                                    <button 
+                                        onClick={downloadToWallet}
+                                        className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+                                    >
+                                        <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M12 2L2 7v10c0 5.5 3.8 10.7 10 12 6.2-1.3 10-6.5 10-12V7l-10-5zm0 2.2l8 4v8.3c0 4.5-3.2 8.8-8 9.8-4.8-1-8-5.3-8-9.8v-8.3l8-4zM10 14l-3-3-1.4 1.4L10 16.8l7.4-7.4L16 8l-6 6z" />
+                                        </svg>
+                                        Add to Apple Wallet / Google Wallet
+                                    </button>
+                                    <p className="text-xs text-[rgb(var(--color-text-subtle))] mt-2 text-center">Download as contact card (.vcf)</p>
+                                </div>
                             </div>
                         )}
 
