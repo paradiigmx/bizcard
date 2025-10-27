@@ -165,3 +165,28 @@ export interface ContactList {
     updatedAt: string;
     color?: string;
 }
+
+export type SubscriptionTier = 'free' | 'pro';
+
+export interface SubscriptionStatus {
+    tier: SubscriptionTier;
+    isActive: boolean;
+    expiresAt?: string;
+}
+
+export const SUBSCRIPTION_LIMITS = {
+    free: {
+        maxContacts: 50,
+        allowedTemplates: ['Photo'] as BusinessCardTemplate[],
+        canExportLists: false,
+        canBulkEmail: false,
+        canExportCSV: false,
+    },
+    pro: {
+        maxContacts: Infinity,
+        allowedTemplates: ['Photo', 'Modern', 'Classic', 'Minimal'] as BusinessCardTemplate[],
+        canExportLists: true,
+        canBulkEmail: true,
+        canExportCSV: true,
+    }
+};

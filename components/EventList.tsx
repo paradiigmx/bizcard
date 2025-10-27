@@ -304,7 +304,7 @@ const EventList: React.FC<EventListProps> = ({ events, contacts, onSelectEvent, 
                         <div className="flex gap-4 items-start">
                             <div className="flex-shrink-0">
                                 <img 
-                                    src="/bizcard-logo.png" 
+                                    src="/bizcard-icon.png" 
                                     alt="BizCard Logo" 
                                     className="w-24 h-24 rounded-full object-cover border-2 border-blue-200 dark:border-blue-700"
                                 />

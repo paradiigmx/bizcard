@@ -3,12 +3,12 @@
   "name": "BizCard AI Scanner",
   "icons": [
     {
-      "src": "/bizcard-logo.png",
+      "src": "/bizcard-icon.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/bizcard-logo.png",
+      "src": "/bizcard-icon.png",
       "sizes": "512x512",
       "type": "image/png"
     }

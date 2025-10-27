@@ -7,6 +7,7 @@ import { exportContactsCSV, getDefaultAvatar, sendEmailToContacts } from '../uti
 import { useAppContext } from '../app/provider';
 import { US_STATES } from '../constants';
 import Link from 'next/link';
+import PaywallModal from './PaywallModal';
 
 interface ContactListProps {
     contacts: Contact[];
@@ -122,7 +123,7 @@ const MultiSelectTagFilter = <T extends string>({ label, options, selectedOption
 };
 
 const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact, onToggleFavorite, events, filterEventId, onSetFilterEventId, t }) => {
-    const { settings, handleBulkAddToFavorites, handleBulkDelete, handleCreateList, handleAddContactsToList, lists, allTags: globalTags, setContacts } = useAppContext();
+    const { settings, handleBulkAddToFavorites, handleBulkDelete, handleCreateList, handleAddContactsToList, lists, allTags: globalTags, setContacts, canAccessFeature } = useAppContext();
     const [searchQuery, setSearchQuery] = useState('');
     const [filterTags, setFilterTags] = useState<string[]>([]);
     const [filterEventRoles, setFilterEventRoles] = useState<EventRole[]>([]);
@@ -132,16 +133,19 @@ const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact, on
     const [filterFavoritesOnly, setFilterFavoritesOnly] = useState(settings.filterPreferences?.showFavoritesOnly ?? false);
     const [filterFollowUpsOnly, setFilterFollowUpsOnly] = useState(settings.filterPreferences?.showFollowUpsOnly ?? false);
     const [showHidden, setShowHidden] = useState(false);
-    const [filterLocationState, setFilterLocationState] = useState<string>('');
+    const [filterLocationState, setFilterLocationState] = useState<string>(settings.filterPreferences?.defaultStateFilter || '');
     const [isFiltersVisible, setIsFiltersVisible] = useState(false);
     const [noteModalContact, setNoteModalContact] = useState<Contact | null>(null);
     const [isMultiSelectMode, setIsMultiSelectMode] = useState(false);
     const [selectedContacts, setSelectedContacts] = useState<Set<string>>(new Set());
     const [showBulkActionModal, setShowBulkActionModal] = useState<string | null>(null);
+    const [showPaywall, setShowPaywall] = useState(false);
+    const [paywallFeature, setPaywallFeature] = useState('');
     
     useEffect(() => {
         setFilterFavoritesOnly(settings.filterPreferences?.showFavoritesOnly ?? false);
         setFilterFollowUpsOnly(settings.filterPreferences?.showFollowUpsOnly ?? false);
+        setFilterLocationState(settings.filterPreferences?.defaultStateFilter || '');
     }, [settings.filterPreferences]);
     
     const nonProfileContacts = useMemo(() => contacts.filter(c => c.id !== 'my_profile_id'), [contacts]);
@@ -226,11 +230,27 @@ const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact, on
     };
     
     const handleExport = () => {
+        if (!canAccessFeature('exportCSV')) {
+            setPaywallFeature('CSV export');
+            setShowPaywall(true);
+            return;
+        }
+        
         const blob = exportContactsCSV(filteredContacts);
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url; a.download = 'contacts.csv'; a.click();
         URL.revokeObjectURL(url);
+    };
+    
+    const handleEmail = () => {
+        if (!canAccessFeature('bulkEmail')) {
+            setPaywallFeature('bulk email');
+            setShowPaywall(true);
+            return;
+        }
+        
+        sendEmailToContacts(filteredContacts);
     };
 
     const handleShare = async () => {
@@ -443,7 +463,7 @@ const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact, on
                                 <BadgeCheckIcon className="h-5 w-5" />
                                 <span className="hidden sm:inline">Select</span>
                             </button>
-                            <button onClick={() => sendEmailToContacts(filteredContacts)} className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-[rgb(var(--color-success))] rounded-lg shadow hover:opacity-90 transition-opacity">
+                            <button onClick={handleEmail} className="flex items-center justify-center gap-2 px-3 py-2 text-sm font-semibold text-white bg-[rgb(var(--color-success))] rounded-lg shadow hover:opacity-90 transition-opacity">
                                 <MailIcon className="h-5 w-5" />
                                 <span className="hidden sm:inline">Send Email</span>
                             </button>
@@ -762,6 +782,12 @@ const ContactList: React.FC<ContactListProps> = ({ contacts, onSelectContact, on
                     </div>
                 </div>
             )}
+            
+            <PaywallModal 
+                isOpen={showPaywall} 
+                onClose={() => setShowPaywall(false)} 
+                feature={paywallFeature} 
+            />
         </div>
     );
 };

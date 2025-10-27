@@ -59,7 +59,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({ options, value, onChange })
 };
 
 const AddContact: React.FC<AddContactProps> = ({ onSaveContact, onCancel, allTags, events, defaultEventId, defaultCompanyId, onCreateEvent, prefillData, existingContacts, autoOpenCamera = false }) => {
-    const { findOrCreateCompanyByName, companies, handleCreateCompany, getCompanyById, settings, handleSaveContact, handleAddContactsToList } = useAppContext();
+    const { findOrCreateCompanyByName, companies, handleCreateCompany, getCompanyById, settings, handleSaveContact, handleAddContactsToList, canAddContact } = useAppContext();
     const router = useRouter();
     
     // Wrapper to update contact
@@ -246,6 +246,13 @@ const AddContact: React.FC<AddContactProps> = ({ onSaveContact, onCancel, allTag
 
     const handleSave = () => {
         if(!contact.name) return;
+        
+        // Check if user can add more contacts (subscription limit)
+        const { allowed, reason } = canAddContact();
+        if (!allowed) {
+            alert(reason);
+            return;
+        }
 
         // Prevent race conditions from rapid clicking
         if (isSavingRef.current) {
@@ -455,6 +462,14 @@ const AddContact: React.FC<AddContactProps> = ({ onSaveContact, onCancel, allTag
                     
                     // Use setTimeout to ensure state update completes before saving
                     setTimeout(() => {
+                        // Check if user can add more contacts (subscription limit)
+                        const { allowed, reason } = canAddContact();
+                        if (!allowed) {
+                            alert(reason);
+                            isSavingRef.current = false;
+                            return;
+                        }
+                        
                         let companyId: string | undefined;
                         if (updatedContact.company && updatedContact.company.trim()) {
                             const foundOrCreatedCompany = findOrCreateCompanyByName(updatedContact.company);

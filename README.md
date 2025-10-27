@@ -7,7 +7,7 @@
 
 An intelligent business card scanner application powered by Google Gemini AI. Built with Next.js, React, and TypeScript.
 
-![BizCard+ Screenshot](public/bizcard-logo.png)
+![BizCard+ Logo](public/bizcard-logo-new.png)
 
 ## Features
 
@@ -132,7 +132,7 @@ Currently, the app uses localStorage for data persistence. To integrate Supabase
 
 ### Branding
 
-- Update logo in `/public/bizcard-logo.png`
+- Update logo in `/public/bizcard-logo-new.png`
 - Update PWA icons in `/public/` and `manifest.json`
 - Modify company info in `app/components/MainLayout.tsx`
 

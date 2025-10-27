@@ -1,7 +1,8 @@
 "use client";
 
 import React, { createContext, useState, useCallback, useMemo, useEffect, useContext, ReactNode } from 'react';
-import type { Contact, Event, AppSettings, Company, ContactList } from '@/types';
+import type { Contact, Event, AppSettings, Company, ContactList, SubscriptionStatus, SubscriptionTier } from '@/types';
+import { SUBSCRIPTION_LIMITS } from '@/types';
 import { DUMMY_CONTACTS, DUMMY_EVENTS, MY_PROFILE, INITIAL_CONTACTS, INITIAL_EVENTS, INITIAL_MY_PROFILE, translations } from '@/constants';
 import QrCodeModal from '@/components/QrCodeModal';
 
@@ -12,6 +13,7 @@ const LS_KEYS = {
   settings: 'bc_settings',
   companies: 'bc_companies',
   lists: 'bc_lists',
+  subscription: 'bc_subscription',
 };
 
 interface AppContextType {
@@ -27,6 +29,8 @@ interface AppContextType {
   setCompanies: React.Dispatch<React.SetStateAction<Company[]>>;
   lists: ContactList[];
   setLists: React.Dispatch<React.SetStateAction<ContactList[]>>;
+  subscription: SubscriptionStatus;
+  setSubscription: React.Dispatch<React.SetStateAction<SubscriptionStatus>>;
   allTags: string[];
   t: (key: string) => string;
   handleSaveContact: (newContact: Omit<Contact, 'id'>) => Contact;
@@ -55,6 +59,9 @@ interface AppContextType {
   handleBulkAddToFavorites: (contactIds: string[]) => void;
   handleBulkDelete: (contactIds: string[]) => void;
   handleResetData: () => void;
+  canAccessFeature: (feature: 'exportLists' | 'bulkEmail' | 'exportCSV' | 'allTemplates') => boolean;
+  canAddContact: () => { allowed: boolean; reason?: string };
+  upgradeToPro: () => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -73,6 +80,11 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoSaveInterval: 5
 };
 
+const DEFAULT_SUBSCRIPTION: SubscriptionStatus = {
+  tier: 'free',
+  isActive: true
+};
+
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [myProfile, setMyProfile] = useState<Contact>(MY_PROFILE);
@@ -80,6 +92,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [lists, setLists] = useState<ContactList[]>([]);
   const [settings, setSettings] = useState<AppSettings>(DEFAULT_SETTINGS);
+  const [subscription, setSubscription] = useState<SubscriptionStatus>(DEFAULT_SUBSCRIPTION);
   const [isInitialized, setIsInitialized] = useState(false);
   const [contactToShareBack, setContactToShareBack] = useState<Contact | null>(null);
 
@@ -238,6 +251,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       } else {
         setSettings(DEFAULT_SETTINGS);
       }
+      
+      const sub = localStorage.getItem(LS_KEYS.subscription);
+      if (sub) {
+        setSubscription(JSON.parse(sub));
+      } else {
+        setSubscription(DEFAULT_SUBSCRIPTION);
+      }
     } catch (e) {
       console.error("Failed to hydrate state from localStorage", e);
       setContacts(INITIAL_CONTACTS);
@@ -246,6 +266,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       setCompanies([]);
       setLists([]);
       setSettings(DEFAULT_SETTINGS);
+      setSubscription(DEFAULT_SUBSCRIPTION);
     }
     setIsInitialized(true);
   }, []);
@@ -315,6 +336,16 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
     }
   }, [lists, isInitialized]);
+  
+  useEffect(() => { 
+    if (isInitialized) {
+      try {
+        localStorage.setItem(LS_KEYS.subscription, JSON.stringify(subscription));
+      } catch (e) {
+        console.error("Failed to save subscription to localStorage:", e);
+      }
+    }
+  }, [subscription, isInitialized]);
 
   const t = useCallback((key: string): string => {
     return translations[settings.language]?.[key] || key;
@@ -543,14 +574,52 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   }, []);
 
+  const canAccessFeature = useCallback((feature: 'exportLists' | 'bulkEmail' | 'exportCSV' | 'allTemplates'): boolean => {
+    const limits = SUBSCRIPTION_LIMITS[subscription.tier];
+    switch (feature) {
+      case 'exportLists':
+        return limits.canExportLists;
+      case 'bulkEmail':
+        return limits.canBulkEmail;
+      case 'exportCSV':
+        return limits.canExportCSV;
+      case 'allTemplates':
+        return limits.allowedTemplates.length > 1;
+      default:
+        return false;
+    }
+  }, [subscription.tier]);
+
+  const canAddContact = useCallback((): { allowed: boolean; reason?: string } => {
+    const limits = SUBSCRIPTION_LIMITS[subscription.tier];
+    const currentContactCount = contacts.length;
+    
+    if (currentContactCount >= limits.maxContacts) {
+      return {
+        allowed: false,
+        reason: `You've reached the limit of ${limits.maxContacts} contacts on the free plan. Upgrade to Pro for unlimited contacts.`
+      };
+    }
+    
+    return { allowed: true };
+  }, [subscription.tier, contacts.length]);
+
+  const upgradeToPro = useCallback(() => {
+    setSubscription({
+      tier: 'pro',
+      isActive: true
+    });
+  }, []);
+
   const value = {
     contacts, setContacts, myProfile, setMyProfile, events, setEvents, settings, setSettings,
-    companies, setCompanies, lists, setLists, allTags, t, handleSaveContact, handleUpdateContact, 
+    companies, setCompanies, lists, setLists, subscription, setSubscription, allTags, t, handleSaveContact, handleUpdateContact, 
     handleToggleFavorite, handleDeleteContact, handleToggleHideContact, handleCreateEvent, handleUpdateEvent, 
     handleDeleteEvent, handleToggleHideEvent, handleUpdateMyProfile, handleCreateCompany, handleUpdateCompany, 
     handleDeleteCompany, handleToggleFavoriteCompany, handleToggleHideCompany, findOrCreateCompanyByName, 
     getCompanyById, getContactsByCompanyId, handleCreateList, handleUpdateList, handleDeleteList,
-    handleAddContactsToList, handleRemoveContactFromList, handleBulkAddToFavorites, handleBulkDelete, handleResetData
+    handleAddContactsToList, handleRemoveContactFromList, handleBulkAddToFavorites, handleBulkDelete, handleResetData,
+    canAccessFeature, canAddContact, upgradeToPro
   };
 
   return (

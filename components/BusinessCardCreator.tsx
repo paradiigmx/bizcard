@@ -1,9 +1,12 @@
 "use client";
 import React, { useState, useRef } from 'react';
 import type { Contact, BusinessCardTemplate } from '../types';
+import { SUBSCRIPTION_LIMITS } from '../types';
 import QRCode from 'qrcode.react';
 import { DownloadIcon, ShareIcon, XIcon, CameraIcon, TrashIcon } from './icons';
 import { compressImage } from '../utils';
+import { useAppContext } from '../app/provider';
+import PaywallModal from './PaywallModal';
 
 interface BusinessCardCreatorProps {
     profile: Contact;
@@ -12,8 +15,10 @@ interface BusinessCardCreatorProps {
 }
 
 const BusinessCardCreator: React.FC<BusinessCardCreatorProps> = ({ profile, onUpdateProfile, onClose }) => {
+    const { subscription } = useAppContext();
     const [selectedTemplate, setSelectedTemplate] = useState<BusinessCardTemplate>(profile.businessCardTemplate || 'Photo');
     const [showLogoUpload, setShowLogoUpload] = useState(false);
+    const [showPaywall, setShowPaywall] = useState(false);
     const [cardColors, setCardColors] = useState(profile.businessCardColors || {
         from: '#2563eb',
         via: '#9333ea',
@@ -22,6 +27,14 @@ const BusinessCardCreator: React.FC<BusinessCardCreatorProps> = ({ profile, onUp
     const cardRef = useRef<HTMLDivElement>(null);
 
     const handleTemplateSelect = (template: BusinessCardTemplate) => {
+        // Check if template is allowed for current subscription
+        const allowedTemplates = SUBSCRIPTION_LIMITS[subscription.tier].allowedTemplates;
+        
+        if (!allowedTemplates.includes(template)) {
+            setShowPaywall(true);
+            return;
+        }
+        
         setSelectedTemplate(template);
         onUpdateProfile({ ...profile, businessCardTemplate: template });
     };
@@ -295,19 +308,29 @@ const BusinessCardCreator: React.FC<BusinessCardCreatorProps> = ({ profile, onUp
                 <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3 text-[rgb(var(--color-text-primary))]">Choose Template</h3>
                     <div className="grid grid-cols-4 gap-4">
-                        {(['Photo', 'Modern', 'Classic', 'Minimal'] as BusinessCardTemplate[]).map((template) => (
-                            <button
-                                key={template}
-                                onClick={() => handleTemplateSelect(template)}
-                                className={`p-4 border-2 rounded-lg font-semibold transition-all ${
-                                    selectedTemplate === template
-                                        ? 'border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary)/0.1)] text-[rgb(var(--color-primary))]'
-                                        : 'border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg-secondary))] hover:border-[rgb(var(--color-primary)/0.5)]'
-                                }`}
-                            >
-                                {template}
-                            </button>
-                        ))}
+                        {(['Photo', 'Modern', 'Classic', 'Minimal'] as BusinessCardTemplate[]).map((template) => {
+                            const allowedTemplates = SUBSCRIPTION_LIMITS[subscription.tier].allowedTemplates;
+                            const isLocked = !allowedTemplates.includes(template);
+                            
+                            return (
+                                <button
+                                    key={template}
+                                    onClick={() => handleTemplateSelect(template)}
+                                    className={`p-4 border-2 rounded-lg font-semibold transition-all relative ${
+                                        selectedTemplate === template
+                                            ? 'border-[rgb(var(--color-primary))] bg-[rgb(var(--color-primary)/0.1)] text-[rgb(var(--color-primary))]'
+                                            : 'border-[rgb(var(--color-border))] bg-[rgb(var(--color-bg-secondary))] hover:border-[rgb(var(--color-primary)/0.5)]'
+                                    } ${isLocked ? 'opacity-75' : ''}`}
+                                >
+                                    {template}
+                                    {isLocked && (
+                                        <span className="absolute top-1 right-1 bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+                                            PRO
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -404,6 +427,12 @@ const BusinessCardCreator: React.FC<BusinessCardCreatorProps> = ({ profile, onUp
                     </button>
                 </div>
             </div>
+            
+            <PaywallModal 
+                isOpen={showPaywall} 
+                onClose={() => setShowPaywall(false)} 
+                feature="all business card templates" 
+            />
         </div>
     );
 };

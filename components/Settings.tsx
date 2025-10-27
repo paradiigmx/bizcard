@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import type { AppSettings, Theme, FontSize, Language, ContactType, NotificationPreferences, EventRole, FilterPreferences, ContactList, Event } from '../types';
-import { LANGUAGES, LANGUAGE_NAMES } from '../constants';
-import { CONTACT_TYPES } from '../types';
+import { LANGUAGES, LANGUAGE_NAMES, US_STATES } from '../constants';
+import { CONTACT_TYPES, SUBSCRIPTION_LIMITS } from '../types';
 import { ChevronDownIcon, DownloadIcon, UploadIcon } from './icons';
+import { useAppContext } from '../app/provider';
+import PaywallModal from './PaywallModal';
 
 interface SettingsProps {
     settings: AppSettings;
@@ -24,6 +26,10 @@ const FONT_SIZES: { value: FontSize; label: string }[] = [
 const EVENT_ROLES: EventRole[] = ['Attendee', 'Speaker', 'Host', 'Guest', 'Exhibitor'];
 
 const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSettings, onResetData, t, lists, events, allTags }) => {
+    const { subscription, contacts } = useAppContext();
+    const [isDeleteProfileModalOpen, setIsDeleteProfileModalOpen] = useState(false);
+    const [showPaywall, setShowPaywall] = useState(false);
+    
     const handleThemeChange = (theme: Theme) => {
         onUpdateSettings({ ...settings, theme });
     };
@@ -36,9 +42,42 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSettings, onReset
         onUpdateSettings({ ...settings, fontSize });
     };
     
+    const handleDeleteProfile = () => {
+        localStorage.removeItem('bc_my_profile');
+        setIsDeleteProfileModalOpen(false);
+        alert('Your profile has been deleted. The page will now reload.');
+        window.location.reload();
+    };
+    
     return (
         <div className="space-y-8">
              <h1 className="text-3xl font-bold text-[rgb(var(--color-text-primary))]">{t('settings.title')}</h1>
+             
+             {isDeleteProfileModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div className="bg-[rgb(var(--color-bg-secondary))] rounded-lg shadow-xl p-6 w-full max-w-md">
+                        <h3 className="text-xl font-bold mb-4 text-[rgb(var(--color-text-primary))]">Delete Your Profile?</h3>
+                        <p className="text-[rgb(var(--color-text-secondary))] mb-6">
+                            Are you sure you want to delete your profile? This will remove all your profile information including your name, role, contact details, and business card settings. 
+                            <span className="block mt-2 text-[rgb(var(--color-danger))] font-semibold">This action cannot be undone.</span>
+                        </p>
+                        <div className="flex justify-end gap-3">
+                            <button 
+                                onClick={() => setIsDeleteProfileModalOpen(false)}
+                                className="px-4 py-2 font-semibold bg-[rgb(var(--color-bg-subtle))] rounded"
+                            >
+                                Cancel
+                            </button>
+                            <button 
+                                onClick={handleDeleteProfile}
+                                className="px-4 py-2 font-semibold bg-[rgb(var(--color-danger))] text-white rounded"
+                            >
+                                Delete Profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+             )}
             <div className="p-4 sm:p-6 bg-[rgb(var(--color-bg-secondary))] rounded-lg shadow">
                 <h2 className="text-xl font-bold text-[rgb(var(--color-text-primary))] mb-4 border-b border-[rgb(var(--color-border))] pb-3">{t('settings.appearance')}</h2>
                 
@@ -268,6 +307,30 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSettings, onReset
                             className="w-5 h-5 rounded accent-[rgb(var(--color-primary))]"
                         />
                     </label>
+                    <div className="border-t border-[rgb(var(--color-border))] pt-3">
+                        <label htmlFor="default-state-filter" className="block font-medium text-[rgb(var(--color-text-secondary))] mb-2">Default State Filter</label>
+                        <p className="text-sm text-[rgb(var(--color-text-subtle))] mb-2">Only show contacts from this state by default</p>
+                        <div className="relative">
+                            <select
+                                id="default-state-filter"
+                                value={settings.filterPreferences?.defaultStateFilter || ''}
+                                onChange={(e) => onUpdateSettings({ 
+                                    ...settings, 
+                                    filterPreferences: { 
+                                        ...(settings.filterPreferences ?? {}),
+                                        defaultStateFilter: e.target.value || undefined
+                                    }
+                                })}
+                                className="w-full bg-[rgb(var(--color-bg-tertiary))] p-2 pr-10 rounded-md focus:ring-[rgb(var(--color-primary))] focus:border-[rgb(var(--color-primary))] appearance-none"
+                            >
+                                <option value="">All States</option>
+                                {US_STATES.map(state => (
+                                    <option key={state} value={state}>{state}</option>
+                                ))}
+                            </select>
+                            <ChevronDownIcon className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 text-[rgb(var(--color-text-subtle))] pointer-events-none" />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -443,6 +506,74 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSettings, onReset
                             />
                         </label>
                     </div>
+                </div>
+            </div>
+            
+            <div className="p-4 sm:p-6 bg-[rgb(var(--color-bg-secondary))] rounded-lg shadow">
+                <h2 className="text-xl font-bold text-[rgb(var(--color-text-primary))] mb-4 border-b border-[rgb(var(--color-border))] pb-3">Subscription</h2>
+                
+                <div className="space-y-4">
+                    <div>
+                        <h3 className="font-semibold text-[rgb(var(--color-text-primary))] mb-2">Current Plan</h3>
+                        <div className="flex items-center justify-between bg-[rgb(var(--color-bg-subtle))] p-4 rounded-lg">
+                            <div>
+                                <p className="text-2xl font-bold text-[rgb(var(--color-text-primary))]">
+                                    {subscription.tier === 'pro' ? 'Pro' : 'Free'}
+                                </p>
+                                <p className="text-sm text-[rgb(var(--color-text-secondary))] mt-1">
+                                    {subscription.tier === 'pro' 
+                                        ? 'Unlimited contacts & all features' 
+                                        : `${contacts.length} / ${SUBSCRIPTION_LIMITS.free.maxContacts} contacts used`
+                                    }
+                                </p>
+                            </div>
+                            {subscription.tier === 'free' && (
+                                <button
+                                    onClick={() => setShowPaywall(true)}
+                                    className="px-4 py-2 font-semibold text-white bg-blue-500 rounded-lg shadow hover:bg-blue-600 transition-colors"
+                                >
+                                    Upgrade to Pro
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div className="p-4 sm:p-6 bg-[rgb(var(--color-bg-secondary))] rounded-lg shadow">
+                <h2 className="text-xl font-bold text-[rgb(var(--color-text-primary))] mb-4 border-b border-[rgb(var(--color-border))] pb-3">Privacy Policy</h2>
+                
+                <div className="prose prose-sm max-w-none text-[rgb(var(--color-text-secondary))]">
+                    <h3 className="text-[rgb(var(--color-text-primary))] font-semibold">Data Storage</h3>
+                    <p>BizCard+ stores all your data locally in your browser. We do not transmit or store your contacts, events, or personal information on our servers.</p>
+                    
+                    <h3 className="text-[rgb(var(--color-text-primary))] font-semibold mt-4">AI Processing</h3>
+                    <p>When you use the business card scanner, images are sent to Google's Gemini AI for processing. The images are not stored by Google after processing.</p>
+                    
+                    <h3 className="text-[rgb(var(--color-text-primary))] font-semibold mt-4">Data Control</h3>
+                    <p>You have full control over your data. You can export your contacts as CSV files, delete individual contacts, or reset all app data at any time.</p>
+                    
+                    <h3 className="text-[rgb(var(--color-text-primary))] font-semibold mt-4">Third-Party Services</h3>
+                    <p>This app uses Google Gemini AI for business card scanning. Your use of this feature is subject to Google's privacy policy.</p>
+                </div>
+            </div>
+            
+            <div className="p-4 sm:p-6 bg-[rgb(var(--color-bg-secondary))] rounded-lg shadow">
+                <h2 className="text-xl font-bold text-[rgb(var(--color-text-primary))] mb-4 border-b border-[rgb(var(--color-border))] pb-3">Data Management</h2>
+                
+                <div className="space-y-4">
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 border-t border-[rgb(var(--color-border))] pt-4">
+                        <div>
+                            <h3 className="font-semibold text-[rgb(var(--color-text-primary))]">Delete Profile</h3>
+                            <p className="text-[rgb(var(--color-text-subtle))]">Permanently delete your profile information</p>
+                        </div>
+                        <button
+                            onClick={() => setIsDeleteProfileModalOpen(true)}
+                            className="px-4 py-2 font-semibold text-white bg-[rgb(var(--color-danger))] rounded-lg shadow hover:opacity-90 transition-opacity"
+                        >
+                            Delete Profile
+                        </button>
+                    </div>
                     <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                         <div>
                             <h3 className="font-semibold text-[rgb(var(--color-text-primary))]">Reset App Data</h3>
@@ -457,6 +588,12 @@ const Settings: React.FC<SettingsProps> = ({ settings, onUpdateSettings, onReset
                     </div>
                 </div>
             </div>
+            
+            <PaywallModal 
+                isOpen={showPaywall} 
+                onClose={() => setShowPaywall(false)} 
+                feature="all premium features" 
+            />
         </div>
     );
 };

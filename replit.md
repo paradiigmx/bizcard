@@ -10,11 +10,28 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**October 27, 2025**
+- **Paywall & Monetization**: Implemented comprehensive freemium subscription model with Free and Pro tiers using RevenueCat infrastructure
+  - **Free Tier**: 50 contact limit, basic business card template only, can download individual contacts, create lists (but no export/email)
+  - **Pro Tier**: Unlimited contacts, all business card templates, CSV export, bulk email functionality
+  - Created PaywallModal component with pricing display and upgrade flow
+  - Integrated subscription state management in AppProvider with localStorage persistence
+  - Added contact limit enforcement in AddContact (manual save and Snap-and-Go camera)
+  - Gated premium business card templates (Modern, Classic, Minimal) with Pro badges in BusinessCardCreator
+  - Gated export CSV and bulk email features in ContactList
+  - Added Subscription Management section to Settings showing current plan, usage stats, and upgrade button
+  - Added Privacy Policy section to Settings covering data storage, AI processing, and third-party services
+
 **October 26, 2025**
+- **State Filter Preference**: Added default state filter to Settings page (Contact Filter Preferences) with US_STATES dropdown - automatically filters contacts by selected state on load
+- **Delete Profile Feature**: Added "Delete Profile" button in Settings with confirmation modal - allows users to permanently delete their profile information
 - **Mobile Optimization**: Fixed responsive layout for contact list buttons - buttons now hide text labels on mobile and show only icons, preventing overflow
 - **Apple Wallet & Google Wallet Support**: Added ability to save contacts to Apple Wallet and Google Wallet via VCF download buttons on profile pages and public share pages
 - **Camera Scanner**: Fixed business card scanner with Google Gemini API integration, now fully functional
 - **Vercel Deployment Fix**: Removed incorrect rewrite rules from vercel.json that were breaking navigation between pages
+- Verified featured contacts (Paradiigm LLC) cannot be deleted - only hidden (hide button replaces delete button)
+- Verified company hide functionality exists in CompanyList and CompanyDetail pages
+- Verified event hide functionality exists in EventList and EventDetail pages
 - Enhanced camera frame for business card capture: Increased frame size from 700px to 850px max-width for better visibility
 - Updated camera frame styling: Removed white border, kept only blue corner guides (6px thick, 16px size) for cleaner interface
 - Improved camera UX: Removed instructional text overlay, changed button text from "Capture Photo" to "Capture business card"
